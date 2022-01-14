@@ -208,24 +208,6 @@ bool Huffman_Tree::decompressFileTo(const string& filePath, const std::streampos
 	}
 }
 
-/*
-string* Huffman_Tree::convertStrToBinary(const unsigned char* str,map<keyType,string>& map,
-	unsigned int& chunkSize,const string& leftOver) const{
-
-	bitset<32> bitset32;
-	if (leftOver.size() > 0) {
-		binStr = leftOver;
-	}
-
-	for (unsigned int i = 0; i < chunkSize; i++) {
-		binStr += map[str[i]].data();// REALLY SLOW (66% load)
-	}
-	
-	delete[] str;
-	string* strings = makeStrTrulyBin(binStr); // makeStrTrulyBin is slow (25% load)
-	return strings;
-}
-*/
 void Huffman_Tree::getCodes() {
 	this->codedVal = new CodedValues[256];
 	getCodesHelper(this->root, codedVal,0,0);
@@ -241,134 +223,13 @@ void Huffman_Tree::getCodesHelper(const Node* node,CodedValues* codedVal,unsigne
 	getCodesHelper(node->left, codedVal,code<<1,size+1);
 	getCodesHelper(node->right, codedVal,(code<<1)|1,size+1);
 }
-/*
-string* Huffman_Tree::makeStrTrulyBin(const string& str) const {
-	string* strings = new string[2]; // one string for converted string (that is divisible by 8),
-	unsigned char ch = 0;
-	unsigned char a = 128;                   
-
-	for (unsigned int i = 0; i < str.length(); i++) {
-		   // whole thing is slow in general
-			
-				ch += a* (str[i] - '0'); 
-				a /= 2;
-				if (a == 0) {
-					strings[0].push_back(ch);
-					ch = 0;
-					a = 128;
-				}
-		
-	}
-	if (a != 128) {
-		for(unsigned int i = str.length() - (str.length()%8) ;i<str.length();i++)
-		strings[1].push_back(str[i]);
-	}
-	else {
-		strings[1] = "";
-	}
-	return strings;
-}
-*/
-/*
-bool Huffman_Tree::writeStringToFile(const string& str, const string& destination) {
-	ofstream output(destination, ios::app | ios::binary);
-	if (output) {
-		output.write(&str[0], str.length());
-		return true;
-	}
-	else {
-		cout << "Error! Could not open " << destination << " for writing." << endl;
-		return false;
-	}
-	output.close();
-}
-*/
 
 void Huffman_Tree::adjustChunkSize(unsigned int& chunkSize, const fileSize& sizeOfFile) const {
 	while (chunkSize > sizeOfFile && sizeOfFile!=0) {
 		chunkSize /= 2;
 	}
 }
-/*
-string Huffman_Tree::convertTrulyBinToBinStr(const unsigned char* str, unsigned int& chunkSize,const string& leftOver) const {
-	string BinFile;
-	if (leftOver.size() > 0) {
-		BinFile = leftOver;
-	}
-	for (unsigned int i = 0; i < chunkSize; i++) {
-		BinFile += convertCharBackToBin(str[i]);
-	}
-	delete[] str;
 
-	return BinFile;
-}
-*/
-/*
-string Huffman_Tree::convertCharBackToBin(unsigned char ch) const {
-	string Bin;
-	while (ch != 0) {
-		Bin += (unsigned char)(48+(ch % 2));
-		ch /= 2;
-	}
-	while(Bin.size() != 8) {
-		Bin += '0';
-	}
-	for (unsigned char i = 0; i < 4; i++) {
-		unsigned char swap = Bin[i];
-		Bin[i] = Bin[7 - i];
-		Bin[7 - i] = swap;
-	}
-	return Bin;
-}
-*/
-/*
-string Huffman_Tree::writeAndReturnLeftOver(const string& binStr, const string& destination,fileSize& sizeBits) {
-	string str1, str2;
-
-	getOriginalStrFromTree(binStr,str1,str2,sizeBits);
-	writeStringToFile(str1, destination);
-	
-	return str2;
-}
-*/
-/*
-void Huffman_Tree::getOriginalStrFromTree(const string& binStr, string& str1, string& str2, fileSize& sizeBits) {
-
-	if (sizeBits == 0) {
-		return;
-	}
-	Node* node = this->root;
-
-	for (unsigned int i = 0; i < binStr.size()+1;i++) {
-		if (node->left == nullptr || node->right == nullptr) {
-			str1.push_back((*node).data);
-			str2.clear();
-			node = this->root;
-			i--;
-			continue;
-		}
-		if (i == binStr.size()) {
-			sizeBits += str2.size();
-			return;
-		}
-		if (sizeBits == 0) {
-			return;
-		}
-		else if (binStr[i] == '0') {
-			sizeBits--;
-			str2.push_back(binStr[i]);
-			node = node->left;
-			continue;
-		}
-		else if (binStr[i] == '1') {
-			sizeBits--;
-			str2.push_back(binStr[i]);
-			node = node->right;
-			continue;
-		}
-	}
-}
-*/
 fileSize Huffman_Tree::getCompressedStrSizeInBytes(const Frequency_Map& freqMap) const {
 
 	fileSize size = getCompressedLengthInBits(freqMap, this->codedVal);
