@@ -256,3 +256,4 @@ fileSize Huffman_Tree::getCompressedLengthInBits(const Frequency_Map& freqMap, c
 const Node* Huffman_Tree::getRoot() const {
 	return root;
 }
+
